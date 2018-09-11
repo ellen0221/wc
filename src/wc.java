@@ -140,7 +140,20 @@ public class wc {
     }
 
     public static void moredata(int first) throws IOException {
-        
+        int line = 0;
+        File files = new File("src" + File.separator + filename.get(first));
+        if (files.exists()) {    //判断文件是否存在
+            BufferedReader br = new BufferedReader(new FileReader(files));
+            String s = null;
+            while ((s = br.readLine())!=null) {
+                line++;
+                s = s.replaceAll("\n\r", "");
+
+            }
+            br.close();
+        } else {
+            System.out.println(files.getPath() + " 文件不存在！");
+        }
     }
 
 
