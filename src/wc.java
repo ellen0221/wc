@@ -67,7 +67,6 @@ public class wc {
                         System.out.println("参数输入错误！");
                 }
             }
-
         }
     }
 
@@ -102,6 +101,7 @@ public class wc {
 
     // 实现-w操作：统计指定文件中词的个数
     public static void wordcount(int first) throws IOException {
+            int num = 0;
             File file = new File(filename.get(first));
             if (file.exists()) {
                 BufferedReader br = new BufferedReader(new FileReader(file));
@@ -112,9 +112,16 @@ public class wc {
                     word.append(line);
                 }
                 br.close();
-                String w = word.toString();
+                String w = word.toString().replaceAll("[^a-z^A-Z^\\s*^_]", " ");
                 String[] content = w.split("\\s+");  //以空格分隔字符串
-                int num = content.length;
+                for (int i=0; i<content.length; i++)
+                {
+                    // 只有字符数大于1才算词
+                    if (content[i].length()>1)
+                    {
+                        num++;
+                    }
+                }
                 System.out.println("文件" + filename.get(first) + "的词数为： " + num);
             } else {
                 System.out.println(file.getPath() + " 文件不存在！");
@@ -158,10 +165,10 @@ public class wc {
         File files = new File(filename.get(first));
         if (files.exists()) {    // 判断文件是否存在
             BufferedReader br = new BufferedReader(new FileReader(files));
-            String s = null;
-            while ((s = br.readLine())!=null) {
-                line++;
-//                System.out.println(s);
+            String st = null;
+            while ((st = br.readLine())!=null) {    // 如果文件中最后一行为空行则最后一行不算一行
+                ++line;
+                String s = st.replaceAll("\\s*|\t|\r|\n", "");  // 将字符串中的空格、回车、换行符、制表符去掉
                 if (s.equals("") || s.equals("{") || s.equals("}")) // 判断空行用s.equals("")
                 {
                     // 注释段中的空行不算在空行数中，算在注释行数中
@@ -172,7 +179,7 @@ public class wc {
                         null_line++;
                     }
                 }
-                else if (s.startsWith("//") || s.startsWith("{//") || s.startsWith("}//")) // 单字符后的注释也算注释行   || s.substring(1).startsWith("//")
+                else if (s.startsWith("//") || s.startsWith("{//") || s.startsWith("}//")) // 单字符后的注释也算注释行
                 {
                     note_line++;
                 }
@@ -199,7 +206,8 @@ public class wc {
                         note_line += end-note+1;
                     }
                 }
-                code_line = line-note_line-null_line;   // 代码行=总行数-注释行-空行
+                // 代码行=总行数-注释行-空行
+                code_line = line-note_line-null_line;
             }
             br.close();
             System.out.println("文件" + filename.get(first) + "的代码行/空行/注释行 分别为: " + code_line + "/" + null_line + "/" + note_line);
@@ -213,31 +221,31 @@ public class wc {
     {
         int pathlen = filename.get(0).length();
         int filelen = 0;
-        String pattern = "(\\*)(\\.)([a-z]+)";
+        String pattern = "(\\*)(\\.)([a-z]+)";  // 正则表达式验证后缀名
         Pattern p = Pattern.compile(pattern);
         Matcher m = p.matcher(filename.get(0));
         if (m.find())
         {
-            if (filename.get(0).endsWith(pattern))
-            {
                 // 提取出目录路径
                 filelen = m.group().length();
                 // 判断是否指定路径(默认路径为src/)
                 if (filelen<pathlen) {
-                    String path = filename.get(0).substring(0, filelen-pathlen);
+                    String path = filename.get(0).substring(0, pathlen-filelen);
                     String extension = m.group().substring(1);
                     handleall(path, extension);  // 指定路径
                 } else {
                     String extension = m.group().substring(1);
                     handleall("", extension);   // 默认路径
                 }
-            }
         }else {
+            // 非默认路径下
             if (pathlen!=0)
             {
-                handleall(filename.get(0), "");  // 指定文件路径不指定文件后缀名
+                // 指定文件路径不指定文件后缀名
+                handleall(filename.get(0), "");
             }
-            handleall("", "");  // 默认路径下不指定文件后缀名
+            // 默认路径下不指定文件后缀名
+            handleall("", "");
         }
     }
 }
