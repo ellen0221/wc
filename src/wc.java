@@ -79,7 +79,7 @@ public class wc {
             br.close();
             String content = sb.toString();
             if (parameter.equals("c")) {
-                content.replaceAll("[^a-z^A-Z^0-9]", "");
+                content.replaceAll("[\r\n]", "");
                 int w = content.length();
                 System.out.println("文件" + filename.get(first) + "的字符数为： " + w);
                 return w;
