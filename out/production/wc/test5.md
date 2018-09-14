@@ -1,64 +1,40 @@
-<?php
-
-namespace App\Http\Controllers;
-
-use Illuminate\Http\Request;
-use App\Order;
-
-
-class OrderController extends Controller
-{
-    // 接受用户订单信息并写入队列
-    public function order(Request $request)
-    {
-        $info = $request->input();
-        $moile = $info['mobile'];
-
-        if ($request->isMethod('POST')) {
-
-            if (!empty($info['mobile'])) {
-                //订单中心处理流程
-                // ...
-
-                $order_id = rand(10000,99999);
-
-                //生成的订单信息存入队列表中
-
-                $user = Order::where('mobile', '=', $moile)->update([
-                    'order_id' => $order_id,
-                    'status' => 0,
-                    'created_at' => $this->now()
-                ]);
-
-                if ($user) {
-                    return $order_id . '保存成功';
+// 实现-s操作:递归读取目录下符合条件的文件,加入List
+    public static String handleall(String path, String name) {
+        Pattern p = Pattern.compile(name);
+        Matcher m = null;
+        System.out.println(path);
+        if (path.equals(""))
+        {
+            dir = new File("src");
+        }else {
+            dir = new File(path);
+        }
+        File[] files = dir.listFiles();
+        if (files == null)
+        {
+            System.out.println("该目录为空！");
+            return "null directory!";
+        }
+        for (File f : files)
+        {
+            if (f.isFile()) {
+                if (name.equals(""))
+                {
+                    filename.add(f.getAbsolutePath());
+                }else {
+                    m = p.matcher(f.getName());
+                    if (m.matches())
+                    {
+                        filename.add(f.getAbsolutePath());
+                    }
                 }
-                return '保存失败';
-
+            }else if (f.isDirectory()) {
+                handleall(f.getAbsolutePath(), name);
             }
-
         }
-
+        return "-s success!";
     }
-
-    public function create()
-    {
-        $user = Order::create([
-            'order_id' => 0,
-            'mobile' => '19234750228',
-            'status' => 0,
-            'created_at' => date('Y-m-d H:i:s', time())
-        ]);
-        if (!empty($user)) {
-            return 'success';
-        }
-        return 'error';
-
-    }
-
-    public function now()
-    {
-        return date('Y-m-d H:i:s', time());
-    }
-}
-32/28/4
+-a 27/12/1
+-w 71
+-c 1054
+-l 40

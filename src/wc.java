@@ -17,7 +17,7 @@ public class wc {
     public static String[] para;
     public static List<String> filename = new ArrayList<String>();
 
-    public static void main(String argv[]) throws IOException {
+    public static void main(String[] argv) throws IOException {
         // 获取终端输入
         Scanner input = new Scanner(System.in);
         if (input.hasNextLine())
@@ -25,7 +25,7 @@ public class wc {
             String order = input.nextLine();
             // 获取最后一个空格的索引值
             int f = order.lastIndexOf(" ");
-            // 输出最后一个空格后面的字符串（即文件名）
+            // 输出最后一个空格后面的字符串（即文件绝对路径）
             filename.add(order.substring(f+1));
             if (filename.get(0).matches("(\\-)([a-z])")){
                 filename.set(0, "");
@@ -71,7 +71,7 @@ public class wc {
     }
 
     // 实现-c、-l操作：统计文件字符数或行数
-    public static void stringcount(int first, String parameter) throws IOException {
+    public static int stringcount(int first, String parameter) throws IOException {
         // 统计指定文件的字符数或行数
         int num = 0;
         File files = new File(filename.get(first));
@@ -88,19 +88,24 @@ public class wc {
             String content = sb.toString();
             if (parameter.equals("c")) {
                 content.replaceAll("[^a-z^A-Z^0-9]", "");
-                System.out.println("文件" + filename.get(first) + "的字符数为： " + content.length());
+                int w = content.length();
+                System.out.println("文件" + filename.get(first) + "的字符数为： " + w);
+                return w;
             } else if (parameter.equals("l")){
                 System.out.println("文件" + filename.get(first) + "的行数为： " + num);
+                return num;
             } else {
                 System.out.println("参数输入错误！");
+                return 5000;
             }
         } else {
             System.out.println(files.getPath() + " 文件不存在！");
+            return 500;
         }
     }
 
     // 实现-w操作：统计指定文件中词的个数
-    public static void wordcount(int first) throws IOException {
+    public static int  wordcount(int first) throws IOException {
             int num = 0;
             File file = new File(filename.get(first));
             if (file.exists()) {
@@ -112,7 +117,7 @@ public class wc {
                     word.append(line);
                 }
                 br.close();
-                String w = word.toString().replaceAll("[^a-z^A-Z^\\s*^_]", " ");
+                String w = word.toString().replaceAll("[^a-z^A-Z^_^\r\n]", " ");
                 String[] content = w.split("\\s+");  //以空格分隔字符串
                 for (int i=0; i<content.length; i++)
                 {
@@ -123,14 +128,16 @@ public class wc {
                     }
                 }
                 System.out.println("文件" + filename.get(first) + "的词数为： " + num);
+                return num;
             } else {
                 System.out.println(file.getPath() + " 文件不存在！");
+                return 500;
             }
     }
 
     // 实现-s操作：递归读取目录下符合条件的文件，加入List
-    public static void handleall(String path, String extension) {
-        System.out.println(path);
+    public static List<String> handleall(String path, String name) {
+        Matcher m = null;
         if (path.equals(""))
         {
             dir = new File("src");
@@ -144,16 +151,27 @@ public class wc {
         }
         for (File f : files)
         {
-            if (f.isFile() && f.getName().endsWith(extension)) {
-                filename.add(f.toString());
+            if (f.isFile()) {
+                if (name.equals(""))
+                {
+                    filename.add(f.getAbsolutePath());
+                }else {
+                    Pattern p = Pattern.compile(name);
+                    m = p.matcher(f.getName());
+                    if (m.matches())
+                    {
+                        filename.add(f.getAbsolutePath());
+                    }
+                }
             }else if (f.isDirectory()) {
-                handleall(f.getAbsolutePath().toString(), extension);
+                handleall(f.getAbsolutePath(), name);
             }
         }
+        return filename;
     }
 
     // 实现-a操作
-    public static void moredata(int first) throws IOException {
+    public static String moredata(int first) throws IOException {
         int line = 0;
         int null_line = 0;  // 空行
         int cp1 = 0;    // 用于匹配注释段的起始(/*)与结束(*/),只有当cp1==cp2时注释段才结束
@@ -211,8 +229,10 @@ public class wc {
             }
             br.close();
             System.out.println("文件" + filename.get(first) + "的代码行/空行/注释行 分别为: " + code_line + "/" + null_line + "/" + note_line);
+            return code_line + "/" + null_line + "/" + note_line;
         } else {
             System.out.println(files.getPath() + " 文件不存在！");
+            return "no such file!";
         }
     }
 
@@ -221,31 +241,36 @@ public class wc {
     {
         int pathlen = filename.get(0).length();
         int filelen = 0;
-        String pattern = "(\\*)(\\.)([a-z]+)";  // 正则表达式验证后缀名
-        Pattern p = Pattern.compile(pattern);
-        Matcher m = p.matcher(filename.get(0));
-        if (m.find())
+        String name = null;
+        String file = filename.get(0);
+        if (!file.contains("[*.?]"))
         {
-                // 提取出目录路径
-                filelen = m.group().length();
-                // 判断是否指定路径(默认路径为src/)
-                if (filelen<pathlen) {
-                    String path = filename.get(0).substring(0, pathlen-filelen);
-                    String extension = m.group().substring(1);
-                    handleall(path, extension);  // 指定路径
-                } else {
-                    String extension = m.group().substring(1);
-                    handleall("", extension);   // 默认路径
-                }
-        }else {
-            // 非默认路径下
-            if (pathlen!=0)
+            handleall(file, "");
+        }else
+        {
+            if (file.contains("/"))
             {
-                // 指定文件路径不指定文件后缀名
-                handleall(filename.get(0), "");
+                String[] n = file.split("/");
+                name = n[n.length-1];
+                filelen = name.length();
+                handleall(file.substring(0, pathlen-filelen), deal(name));
             }
-            // 默认路径下不指定文件后缀名
-            handleall("", "");
+            else
+            {
+                handleall("", deal(file));
+            }
         }
+    }
+
+    public static String deal(String name)
+    {
+        name = name.replace(".", "#");
+        name = name.replaceAll("#", "\\.");
+        name = name.replace("*", "#");
+        name = name.replaceAll("#", ".*");
+        name = name.replace("?", "#");
+        name = name.replaceAll("#", ".?");
+        name = "^" + name + "$";
+        return name;
     }
 }
