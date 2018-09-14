@@ -18,56 +18,48 @@ public class wc {
     public static List<String> filename = new ArrayList<String>();
 
     public static void main(String[] argv) throws IOException {
-        // 获取终端输入
-        Scanner input = new Scanner(System.in);
-        if (input.hasNextLine())
-        {
-            String order = input.nextLine();
-            // 获取最后一个空格的索引值
-            int f = order.lastIndexOf(" ");
-            // 输出最后一个空格后面的字符串（即文件绝对路径）
-            filename.add(order.substring(f+1));
+        // 终端输入的参数将存入argv数组
+            // 将最后一个参数加入List（即文件绝对路径）
+            filename.add(argv[argv.length-1]);
             if (filename.get(0).matches("(\\-)([a-z])")){
                 filename.set(0, "");
             }
-            // 分离参数
-            String[] para = order.split("\\s+");
             // 将提取出的文件名添加完整路径
             String f1 = "src" + File.separator + filename.get(0);
             // 首先判断参数是否为-s
-            if (para[0].equals("-s"))
+            if (argv[0].equals("-s"))
             {
                 Checkfile();
                 for (int k=1; k<filename.size(); k++)
                 {   // 处理符合条件的文件
-                    if (para[1].equals("-c"))
+                    if (argv[1].equals("-c"))
                         stringcount(k, "c");
-                    else if (para[1].equals("-l"))
+                    else if (argv[1].equals("-l"))
                         stringcount(k, "l");
-                    else if (para[1].equals("-w"))
+                    else if (argv[1].equals("-w"))
                         wordcount(k);
-                    else if (para[1].equals("-a"))
+                    else if (argv[1].equals("-a"))
                         moredata(k);
                     else
                         System.out.println("参数输入错误！");
                 }
             }else {
                 filename.set(0, f1);
-                for (int i = 0; i<para.length-1; i++) // 如果在终端输入的是：wc.exe -c test.md 则需要将i的初始值设置为1；这里i=0仅做测试使用
+                for (int i = 0; i<argv.length-1; i++) // 如果在终端输入的是：wc.exe -c test.md 则需要将i的初始值设置为1；这里i=0仅做测试使用
                 {
-                    if (para[i].equals("-c"))
+                    if (argv[i].equals("-c"))
                         stringcount(0, "c");
-                    else if (para[i].equals("-w"))
+                    else if (argv[i].equals("-w"))
                         wordcount(0);
-                    else if (para[i].equals("-l"))
+                    else if (argv[i].equals("-l"))
                         stringcount(0, "l");
-                    else if (para[i].equals("-a"))
+                    else if (argv[i].equals("-a"))
                         moredata(0);
                     else
                         System.out.println("参数输入错误！");
                 }
             }
-        }
+//        }
     }
 
     // 实现-c、-l操作：统计文件字符数或行数
