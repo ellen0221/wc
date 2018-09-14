@@ -35,7 +35,7 @@ public class wcTest {
     }
 
     public static void cTest() throws IOException {
-        if (wc.stringcount(1, "c") != 88)
+        if (wc.stringcount(1, "c") != 96)
             System.out.println("-c fail1");
         if (wc.stringcount(2, "c") != 0)
             System.out.println("-c fail2");

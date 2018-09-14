@@ -45,7 +45,7 @@ public class wc {
                 }
             }else {
                 filename.set(0, f1);
-                for (int i = 0; i<argv.length-1; i++) // 如果在终端输入的是：wc.exe -c test.md 则需要将i的初始值设置为1；这里i=0仅做测试使用
+                for (int i = 0; i<argv.length-1; i++)
                 {
                     if (argv[i].equals("-c"))
                         stringcount(0, "c");
@@ -59,15 +59,13 @@ public class wc {
                         System.out.println("参数输入错误！");
                 }
             }
-//        }
     }
 
     // 实现-c、-l操作：统计文件字符数或行数
     public static int stringcount(int first, String parameter) throws IOException {
-        // 统计指定文件的字符数或行数
         int num = 0;
         File files = new File(filename.get(first));
-        if (files.exists()) {   //判断文件是否存在
+        if (files.exists()) {
             BufferedReader br = new BufferedReader(new FileReader(files));
             StringBuilder sb = new StringBuilder();
             while (true) {
@@ -110,7 +108,8 @@ public class wc {
                 }
                 br.close();
                 String w = word.toString().replaceAll("[^a-z^A-Z^_^\r\n]", " ");
-                String[] content = w.split("\\s+");  //以空格分隔字符串
+                //以空格分隔字符串
+                String[] content = w.split("\\s+");
                 for (int i=0; i<content.length; i++)
                 {
                     // 只有字符数大于1才算词
@@ -162,25 +161,30 @@ public class wc {
         return filename;
     }
 
-    // 实现-a操作
+    // 实现-a操作: 统计代码行/空行/注释行
     public static String moredata(int first) throws IOException {
         int line = 0;
         int null_line = 0;  // 空行
-        int cp1 = 0;    // 用于匹配注释段的起始(/*)与结束(*/),只有当cp1==cp2时注释段才结束
+        // 用于匹配注释段的起始(/*)与结束(*/),只有当cp1==cp2时注释段才结束
+        int cp1 = 0;
         int cp2 = 0;
-        int note = 0;   // 标记整段注释的起始行数
+        // 标记整段注释的起始行数
+        int note = 0;
+
         int end = 0;
         int note_line = 0;  // 注释行
         int code_line = 0;  // 代码行
         File files = new File(filename.get(first));
-        if (files.exists()) {    // 判断文件是否存在
+        if (files.exists()) {
             BufferedReader br = new BufferedReader(new FileReader(files));
             String st = null;
-            while ((st = br.readLine())!=null) {    // 如果文件中最后一行为空行则最后一行不算一行
+            while ((st = br.readLine())!=null)
+            {   // 如果文件中最后一行为空行则最后一行不算一行
                 ++line;
-                String s = st.replaceAll("\\s*|\t|\r|\n", "");  // 将字符串中的空格、回车、换行符、制表符去掉
-                if (s.equals("") || s.equals("{") || s.equals("}")) // 判断空行用s.equals("")
-                {
+                // 将字符串中的空格、回车、换行符、制表符去掉
+                String s = st.replaceAll("\\s*|\t|\r|\n", "");
+                if (s.equals("") || s.equals("{") || s.equals("}"))
+                {   // 判断空行用s.equals("")
                     // 注释段中的空行不算在空行数中，算在注释行数中
                     if (s.equals("") && cp1!=cp2)
                     {
@@ -189,8 +193,8 @@ public class wc {
                         null_line++;
                     }
                 }
-                else if (s.startsWith("//") || s.startsWith("{//") || s.startsWith("}//")) // 单字符后的注释也算注释行
-                {
+                else if (s.startsWith("//") || s.startsWith("{//") || s.startsWith("}//"))
+                {   // 单字符后的注释也算注释行
                     note_line++;
                 }
                 else if (s.startsWith("/*"))
@@ -235,7 +239,8 @@ public class wc {
         int filelen = 0;
         String name = null;
         String file = filename.get(0);
-        if (!file.contains("[*.?]"))
+        // 判断是否为文件名，是否含有通配符
+        if (file.replaceAll("[^//.^//*^//?]", "").length()==0)
         {
             handleall(file, "");
         }else
@@ -254,7 +259,7 @@ public class wc {
         }
     }
 
-    // 按正则表达式处理文件名
+    // 按正则表达式处理含通配符的文件名
     public static String deal(String name)
     {
         name = name.replace(".", "#");
