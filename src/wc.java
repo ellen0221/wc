@@ -236,7 +236,7 @@ public class wc {
         }
     }
 
-    // 判断需要处理的目录文件是否指定后缀名
+    // 判断需要处理的是目录还是文件
     public static void Checkfile()
     {
         int pathlen = filename.get(0).length();
@@ -262,6 +262,7 @@ public class wc {
         }
     }
 
+    // 按正则表达式处理文件名
     public static String deal(String name)
     {
         name = name.replace(".", "#");
